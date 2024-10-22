@@ -1,4 +1,7 @@
-public class Bishop extends ChessPiece{
+import java.util.List;
+import java.util.ArrayList;
+
+public class Bishop extends ChessPiece {
     public Bishop(String color) {
         super(color);
     }
@@ -13,29 +16,41 @@ public class Bishop extends ChessPiece{
         return "B";
     }
 
+    @Override
+    public List<ChessPiece> findPathPieces(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
+        List<ChessPiece> pathPieces = new ArrayList<>();
+
+        for (int i = line; i <= toLine; i++) {
+            for (int j = column; j <= toColumn; j++) {
+
+                if (chessBoard.board[i][j] != null) {
+                    pathPieces.add(chessBoard.board[i][j]);
+                }
+            }
+        }
+
+        return pathPieces;
+    }
 
     @Override
     public boolean canMoveToPosition(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
-
-        /// проверяю,что фигура не стоит на месте
         if (line == toLine && column == toColumn) {
             return false;
         }
 
-        /// проверяю,что фигура не выходит за пределы доски
-        if((line < 0 || line > 7)||(toLine < 0 || toLine > 7)||(column < 0 || column > 7)||(toColumn < 0 || toColumn > 7)){
+        if ((line < 0 || line > 7) || (toLine < 0 || toLine > 7) || (column < 0 || column > 7) || (toColumn < 0 || toColumn > 7)) {
             return false;
         }
 
-        /// проверяю, что слон ходит по диаганали
-        if (Math.abs(line - toLine) == Math.abs(column - toColumn)) {
-            if (chessBoard.board[toLine][toColumn] == null) {
-                return true;
-            } else if (chessBoard.board[toLine][toColumn].getColor() != this.color) {
-                return true;
-            } else {return false;}
+        if (Math.abs(line - toLine) != Math.abs(column - toColumn)) {
+            return false;
         }
 
-        return false;
+        if (chessBoard.board[toLine][toColumn] != null && chessBoard.board[toLine][toColumn].getColor() == this.color) {
+            return false;
+        }
+
+        List<ChessPiece> pathPieces = findPathPieces(chessBoard, line, column, toLine, toColumn);
+        return pathPieces.isEmpty();
     }
 }

@@ -1,4 +1,7 @@
-public class Horse extends ChessPiece{
+import java.util.ArrayList;
+import java.util.List;
+
+public class Horse extends ChessPiece {
     public Horse(String color) {
         super(color);
     }
@@ -13,6 +16,21 @@ public class Horse extends ChessPiece{
         return "H";
     }
 
+    @Override
+    public List<ChessPiece> findPathPieces(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
+        List<ChessPiece> pathPieces = new ArrayList<>();
+
+        for (int i = line; i <= toLine; i++) {
+            for (int j = column; j <= toColumn; j++) {
+
+                if (chessBoard.board[i][j] != null) {
+                    pathPieces.add(chessBoard.board[i][j]);
+                }
+            }
+        }
+
+        return pathPieces;
+    }
 
     @Override
     public boolean canMoveToPosition(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {

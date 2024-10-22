@@ -1,4 +1,7 @@
-public class Pawn extends ChessPiece{
+import java.util.ArrayList;
+import java.util.List;
+
+public class Pawn extends ChessPiece {
 
     public Pawn(String color) {
         super(color);
@@ -12,6 +15,22 @@ public class Pawn extends ChessPiece{
     @Override
     public String getSymbol() {
         return "P";
+    }
+
+    @Override
+    public List<ChessPiece> findPathPieces(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
+        List<ChessPiece> pathPieces = new ArrayList<>();
+
+        for (int i = line; i <= toLine; i++) {
+            for (int j = column; j <= toColumn; j++) {
+
+                if (chessBoard.board[i][j] != null) {
+                    pathPieces.add(chessBoard.board[i][j]);
+                }
+            }
+        }
+
+        return pathPieces;
     }
 
     @Override

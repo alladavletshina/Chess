@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class King extends ChessPiece {
 
     private final String color;
@@ -18,6 +21,22 @@ public class King extends ChessPiece {
     }
 
     @Override
+    public List<ChessPiece> findPathPieces(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
+        List<ChessPiece> pathPieces = new ArrayList<>();
+
+        for (int i = line; i <= toLine; i++) {
+            for (int j = column; j <= toColumn; j++) {
+
+                if (chessBoard.board[i][j] != null) {
+                    pathPieces.add(chessBoard.board[i][j]);
+                }
+            }
+        }
+
+        return pathPieces;
+    }
+
+    @Override
     public boolean canMoveToPosition(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
 
         // Проверка того, что фигура не стоит на месте
@@ -30,18 +49,39 @@ public class King extends ChessPiece {
             return false;
         }
 
+        boolean foundOtherFigure = false;
+
+        /// Проверка, что на пути нет других фигур
+        for (int i = line; i <= toLine; i++) {
+            for (int j = column; j <= toColumn; j++) {
+
+                /// Проверка на пересечение с другим объектом
+                if (chessBoard.board[i][j] != null) {
+                    foundOtherFigure = true;
+                    break;
+                }
+            }
+
+            if (foundOtherFigure) {
+                break;
+            }
+        }
+
         // Проверка движения короля на одну клетку в любом направлении
         if (Math.abs(line - toLine) <= 1 && Math.abs(column - toColumn) <= 1) {
-            if (chessBoard.board[toLine][toColumn] == null) {
-                return true;
-            } else if (chessBoard.board[toLine][toColumn].getColor() != this.color) {
+            if (foundOtherFigure) {
+                return false;
+            }
+
+            /// проверяю, что фигура на целевой позиции имеет другой цвет
+            if (chessBoard.board[toLine][toColumn] == null || chessBoard.board[toLine][toColumn].getColor() != this.color) {
                 return true;
             } else {
                 return false;
             }
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     public boolean isUnderAttack(ChessBoard chessBoard, int line, int column) {
