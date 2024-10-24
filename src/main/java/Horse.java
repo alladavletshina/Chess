@@ -17,19 +17,24 @@ public class Horse extends ChessPiece {
     }
 
     @Override
-    public List<ChessPiece> findPathPieces(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
-        List<ChessPiece> pathPieces = new ArrayList<>();
+    public boolean isPathClear(ChessBoard chessBoard,int startX, int startY, int endX, int endY) {
+        int dx = Integer.compare(endX, startX); // направление по X (-1, 0, 1)
+        int dy = Integer.compare(endY, startY); // направление по Y (-1, 0, 1)
 
-        for (int i = line; i <= toLine; i++) {
-            for (int j = column; j <= toColumn; j++) {
+        // Начинаем с клетки после начальной позиции
+        int x = startX + dx;
+        int y = startY + dy;
 
-                if (chessBoard.board[i][j] != null) {
-                    pathPieces.add(chessBoard.board[i][j]);
-                }
+        // Проходим по пути, пока не дойдем до конечной позиции
+        while (x != endX || y != endY) {
+            if (chessBoard.board[x][y] != null) {
+                return false; // Если по пути есть фигура, возвращаем false
             }
+            x += dx;
+            y += dy;
         }
 
-        return pathPieces;
+        return true;
     }
 
     @Override

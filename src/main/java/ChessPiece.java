@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class ChessPiece {
     String color;
@@ -14,7 +12,7 @@ public abstract class ChessPiece {
         return color;
     }
 
-    public abstract List<ChessPiece> findPathPieces(ChessBoard chessBoard, int line, int column, int toLine, int toColumn);
+    public abstract boolean isPathClear(ChessBoard chessBoard,int startX, int startY, int endX, int endY);
 
     public abstract String getSymbol();
 

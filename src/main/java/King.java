@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class King extends ChessPiece {
 
     private final String color;
@@ -21,19 +18,25 @@ public class King extends ChessPiece {
     }
 
     @Override
-    public List<ChessPiece> findPathPieces(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
-        List<ChessPiece> pathPieces = new ArrayList<>();
+    public boolean isPathClear(ChessBoard chessBoard,int startX, int startY, int endX, int endY) {
+        int dx = Integer.compare(endX, startX); // направление по X (-1, 0, 1)
+        int dy = Integer.compare(endY, startY); // направление по Y (-1, 0, 1)
 
-        for (int i = line; i <= toLine; i++) {
-            for (int j = column; j <= toColumn; j++) {
+        // Начинаем с клетки после начальной позиции
+        int x = startX + dx;
+        int y = startY + dy;
 
-                if (chessBoard.board[i][j] != null) {
-                    pathPieces.add(chessBoard.board[i][j]);
-                }
+        // Проходим по пути, пока не дойдем до конечной позиции
+        while (x != endX || y != endY) {
+            if (chessBoard.board[x][y] != null) {
+                return false; // Если по пути есть фигура, возвращаем false
             }
+            x += dx;
+            y += dy;
         }
 
-        return pathPieces;
+        // Проверяем конечную позицию
+        return chessBoard.board[endX][endY] == null;
     }
 
     @Override
@@ -49,29 +52,8 @@ public class King extends ChessPiece {
             return false;
         }
 
-        boolean foundOtherFigure = false;
-
-        /// Проверка, что на пути нет других фигур
-        for (int i = line; i <= toLine; i++) {
-            for (int j = column; j <= toColumn; j++) {
-
-                /// Проверка на пересечение с другим объектом
-                if (chessBoard.board[i][j] != null) {
-                    foundOtherFigure = true;
-                    break;
-                }
-            }
-
-            if (foundOtherFigure) {
-                break;
-            }
-        }
-
         // Проверка движения короля на одну клетку в любом направлении
         if (Math.abs(line - toLine) <= 1 && Math.abs(column - toColumn) <= 1) {
-            if (foundOtherFigure) {
-                return false;
-            }
 
             /// проверяю, что фигура на целевой позиции имеет другой цвет
             if (chessBoard.board[toLine][toColumn] == null || chessBoard.board[toLine][toColumn].getColor() != this.color) {
@@ -84,32 +66,35 @@ public class King extends ChessPiece {
         }
     }
 
-    public boolean isUnderAttack(ChessBoard chessBoard, int line, int column) {
+    // Найти короля определенного цвета
 
-        // Проверка клеток вокруг короля
-        /*for (int i = line - 1; i <= line + 1; ++i) {
-            for (int j = column - 1; j <= column + 1; ++j) {
-                if (i >= 0 && i < 8 && j >= 0 && j < 8) {
-                    if (chessBoard.board[i][j] != null && chessBoard.board[i][j].getColor() != this.color) {
-                        if (canMoveToPosition(chessBoard, i, j, line, column)) {
-                            return true;
-                        }
-                    }
+    public int[] findKing(ChessBoard chessBoard) {
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+
+                if (chessBoard.board[i][j] instanceof King && !chessBoard.board[i][j].getColor().equals(this.color)) {
+                    return new int[] {i, j}; // Возвращаем координаты короля
                 }
-            }
-        }*/
-
-        /// Проверка всех клеток на доске
-        for (int i = 0; i < 8; ++i) {
-            for (int j = 0; j < 8; ++j) {
-                if (chessBoard.board[i][j] != null && chessBoard.board[i][j].getColor() != this.color) {
-                    if (canMoveToPosition(chessBoard, i, j, line, column)) {
-                        return false;
-                    } else return false;
-                } else return false;
             }
         }
 
-        return false;
+        return null;
+    }
+
+
+    public boolean isUnderAttack(ChessBoard chessBoard, int line, int column) {
+        // Проверка всех клеток на доске
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+
+                if (chessBoard.board[i][j] != null && !chessBoard.board[i][j].getColor().equals(this.color)) {
+                    if (chessBoard.board[i][j].canMoveToPosition(chessBoard, i, j, line, column)) {
+                        return true; // Позиция под атакой, прерываем поиск
+                    }
+                }
+            }
+        }
+        return false; // Позиция не под атакой
     }
 }
