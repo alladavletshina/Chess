@@ -1,10 +1,15 @@
 public class King extends ChessPiece {
 
     private final String color;
+    private boolean inCheck;
 
     public King(String color) {
         super(color);
         this.color = color;
+    }
+
+    public void setCheck(boolean inCheck) {
+        this.inCheck = inCheck;
     }
 
     @Override
@@ -66,26 +71,10 @@ public class King extends ChessPiece {
         }
     }
 
-    // Найти короля определенного цвета
-
-    public int[] findKing(ChessBoard chessBoard) {
-
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-
-                if (chessBoard.board[i][j] instanceof King && !chessBoard.board[i][j].getColor().equals(this.color)) {
-                    return new int[] {i, j}; // Возвращаем координаты короля
-                }
-            }
-        }
-
-        return null;
-    }
-
 
     public boolean isUnderAttack(ChessBoard chessBoard, int line, int column) {
         // Проверка всех клеток на доске
-        for (int i = 0; i < 8; ++i) {
+        /*for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
 
                 if (chessBoard.board[i][j] != null && !chessBoard.board[i][j].getColor().equals(this.color)) {
@@ -94,7 +83,7 @@ public class King extends ChessPiece {
                     }
                 }
             }
-        }
+        }*/
         return false; // Позиция не под атакой
     }
 }

@@ -10,6 +10,67 @@ public class ChessBoard {
         return this.nowPlayer;
     }
 
+
+    /// Метод для превращения пешки в ферзя
+    public void promoteToQueen(int line, int column) {
+        if (board[line][column] instanceof Pawn) {
+            String pawnColor = board[line][column].getColor(); // Получаем цвет пешки
+            if ((pawnColor.equals("White") && line == 7) || (pawnColor.equals("Black") && line == 0)) {
+                board[line][column] = new Queen(pawnColor); // Замена пешки на ферзя
+            }
+        }
+    }
+
+    /// Найти короля определенного цвета
+    public int[] findKing(String color) {
+        for (int i = 0; i <= 7; i++) {
+            for (int j = 0; j <= 7; j++) {
+                ChessPiece piece = board[i][j];
+                if (piece instanceof King && piece.getColor().equals(color)) {
+                    return new int[] {i, j}; // Возвращаем координаты короля
+                }
+            }
+        }
+        return null;
+    }
+
+    ///Теперь нужно реализовать метод для проверки, находится ли король под атакой.
+    /// Это делается путем проверки всех возможных ходов противника, чтобы узнать, может ли одна из его фигур атаковать клетку, где находится король.
+
+    public boolean isKingInCheck(String color) {
+        int[] kingPos = findKing(color);
+
+        if (kingPos == null) {
+            return false; // Если король не найден, значит, он не под шахом
+        }
+
+        int kingX = kingPos[0]; // x-координата короля
+        int kingY = kingPos[1]; // y-координата короля
+
+        String opponentColor = color.equals("White") ? "Black" : "White";
+
+        // Проверяем все клетки на доске
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPiece piece = board[i][j];
+
+                // Если на клетке есть фигура противника
+                if (piece != null && piece.getColor().equals(opponentColor)) {
+                    try {
+                        // Проверяем, может ли она атаковать короля
+                        if (piece.canMoveToPosition(this, i, j, kingX, kingY)) {
+                            return true; // Шах
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("Неверные координаты: (" + i + ", " + j + ")");
+                        throw new RuntimeException(e); // Перехватываем исключение и бросаем новое
+                    }
+                }
+            }
+        }
+        return false; // Шаха нет
+    }
+
     public boolean moveToPosition(int startLine, int startColumn, int endLine, int endColumn) {
         if (checkPos(startLine) && checkPos(startColumn)) {
 
@@ -30,9 +91,25 @@ public class ChessBoard {
                 board[startLine][startColumn].check = false;}
 
             if (board[startLine][startColumn].canMoveToPosition(this, startLine, startColumn, endLine, endColumn)) {
-                board[endLine][endColumn] = board[startLine][startColumn]; // if piece can move, we moved a piece
-                board[startLine][startColumn] = null; // set null to previous cell
+                board[endLine][endColumn] = board[startLine][startColumn];
+                promoteToQueen(endLine, endColumn);
+                board[startLine][startColumn] = null;
                 this.nowPlayer = this.nowPlayerColor().equals("White") ? "Black" : "White";
+
+            // Проверяем, находится ли король под шахом после хода
+            /*String opponentColor = nowPlayer.equals("White") ? "Black" : "White"; // Определяем цвет противника
+            int[] kingPos = findKing(nowPlayer); // Находим короля текущего игрока
+            if (kingPos != null) {
+                int kingX = kingPos[0], kingY = kingPos[1];
+                if (isKingInCheck(nowPlayer)) {
+                    // Король под шахом, устанавливаем флаг
+                    ((King) board[kingX][kingY]).setCheck(true);
+                    System.out.println("Шах!");
+                } else {
+                    // Король вне опасности, сбрасываем флаг
+                    ((King) board[kingX][kingY]).setCheck(false);
+                }*/
+
 
                 return true;
             } else return false;

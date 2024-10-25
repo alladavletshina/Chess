@@ -61,7 +61,7 @@ public class Main {
                 System.out.println("Заново");
                 board = buildBoard();
                 board.printBoard();
-            } else {
+            }else {
                 if (s.equals("castling0")) {
                     if (board.castling0()) {
                         System.out.println("Рокировка удалась");
@@ -93,6 +93,7 @@ public class Main {
 
                 }
             }
+
         }
     }
 
