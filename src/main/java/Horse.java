@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Horse extends ChessPiece {
     public Horse(String color) {
         super(color);

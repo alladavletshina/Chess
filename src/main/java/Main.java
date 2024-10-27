@@ -87,14 +87,7 @@ public class Main {
                             System.out.println("Успешно передвинулись");
                             board.printBoard();
 
-                            System.out.println(board.nowPlayerColor());
 
-                            int[] kingPosition = board.findKing(board.nowPlayerColor());
-
-                            // Вывести положение короля
-                            System.out.println("Король " + board.nowPlayerColor() + " сейчас на позиции [" + kingPosition[0] + ", " + kingPosition[1] + "]");
-                            System.out.println("Шах!" + board.isKingInCheck(board.nowPlayerColor()));
-                            System.out.println("Мат!" + board.isCheckmate(board.nowPlayerColor()));
                             if (board.isKingInCheck(board.nowPlayerColor())) {
                                 System.out.println("Шах");
                                 if (board.isCheckmate(board.nowPlayerColor())) {
@@ -103,7 +96,7 @@ public class Main {
                                 }
                             }
 
-                            if (board.pawnPromotion == true) {
+                            if (board.pawnPromotion) {
                                 board.pawnPromotion = false;
                                 System.out.println("Пешка превратилась в Ферзя!");
                             }
