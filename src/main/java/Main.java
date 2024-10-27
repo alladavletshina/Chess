@@ -93,11 +93,12 @@ public class Main {
 
                             // Вывести положение короля
                             System.out.println("Король " + board.nowPlayerColor() + " сейчас на позиции [" + kingPosition[0] + ", " + kingPosition[1] + "]");
-                            System.out.println(board.isKingInCheck(board.nowPlayerColor()));
+                            System.out.println("Шах!" + board.isKingInCheck(board.nowPlayerColor()));
+                            System.out.println("Мат!" + board.isCheckmate(board.nowPlayerColor()));
                             if (board.isKingInCheck(board.nowPlayerColor())) {
                                 System.out.println("Шах");
-                                if (board.isCheckmate(board.getOpponentColor())) {
-                                    System.out.println("Мат! " + board.nowPlayerColor() + " выигрывает!");
+                                if (board.isCheckmate(board.nowPlayerColor())) {
+                                    System.out.println("Мат! " + board.getOpponentColor() + " выигрывает!");
                                     break;
                                 }
                             }
