@@ -86,15 +86,36 @@ public class Main {
                         if (board.moveToPosition(line, column, toLine, toColumn)) {
                             System.out.println("Успешно передвинулись");
                             board.printBoard();
+
+                            System.out.println(board.nowPlayerColor());
+
+                            int[] kingPosition = board.findKing(board.nowPlayerColor());
+
+                            // Вывести положение короля
+                            System.out.println("Король " + board.nowPlayerColor() + " сейчас на позиции [" + kingPosition[0] + ", " + kingPosition[1] + "]");
+                            System.out.println(board.isKingInCheck(board.nowPlayerColor()));
+                            if (board.isKingInCheck(board.nowPlayerColor())) {
+                                System.out.println("Шах");
+                                if (board.isCheckmate(board.getOpponentColor())) {
+                                    System.out.println("Мат! " + board.nowPlayerColor() + " выигрывает!");
+                                    break;
+                                }
+                            }
+
+                            if (board.pawnPromotion == true) {
+                                board.pawnPromotion = false;
+                                System.out.println("Пешка превратилась в Ферзя!");
+                            }
+
                         } else System.out.println("Передвижение не удалось");
                     } catch (Exception e) {
                         System.out.println("Вы что-то ввели не так, попробуйте ещё раз");
                     }
-
                 }
             }
-
         }
     }
-
 }
+
+
+

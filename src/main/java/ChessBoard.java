@@ -1,4 +1,7 @@
 public class ChessBoard {
+
+    public boolean pawnPromotion;
+
     public ChessPiece[][] board = new ChessPiece[8][8]; // creating a field for game
     String nowPlayer;
 
@@ -10,6 +13,9 @@ public class ChessBoard {
         return this.nowPlayer;
     }
 
+    public String getOpponentColor() {
+        return this.nowPlayer.equals("White") ? "Black" : "White";
+    }
 
     /// Метод для превращения пешки в ферзя
     public void promoteToQueen(int line, int column) {
@@ -17,71 +23,89 @@ public class ChessBoard {
             String pawnColor = board[line][column].getColor(); // Получаем цвет пешки
             if ((pawnColor.equals("White") && line == 7) || (pawnColor.equals("Black") && line == 0)) {
                 board[line][column] = new Queen(pawnColor); // Замена пешки на ферзя
-            }
+                pawnPromotion = true;
+            } else pawnPromotion = false;
         }
     }
 
     /// Найти короля определенного цвета
-    public int[] findKing(String color) {
-        for (int i = 0; i <= 7; i++) {
-            for (int j = 0; j <= 7; j++) {
+    public int[] findKing(String playerColor) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 ChessPiece piece = board[i][j];
-                if (piece instanceof King && piece.getColor().equals(color)) {
+                if (piece instanceof King && piece.getColor().equals(playerColor)) {
                     return new int[] {i, j}; // Возвращаем координаты короля
                 }
             }
         }
-        return null;
+        return null; // Король не найден
     }
 
-    ///Теперь нужно реализовать метод для проверки, находится ли король под атакой.
-    /// Это делается путем проверки всех возможных ходов противника, чтобы узнать, может ли одна из его фигур атаковать клетку, где находится король.
+    /// Проверка, находится ли король под шахом
+    public boolean isKingInCheck(String playerColor) {
+        int[] kingPos = findKing(playerColor);
 
-    public boolean isKingInCheck(String color) {
-        int[] kingPos = findKing(color);
-
-        if (kingPos == null) {
-            return false; // Если король не найден, значит, он не под шахом
+        try {
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    ChessPiece piece = board[i][j];
+                    if (piece != null && !piece.getColor().equals(playerColor)) {
+                        try {
+                            if (piece.canMoveToPosition(this, i, j, kingPos[0], kingPos[1])) {
+                                return true;
+                            }
+                        } catch (Exception e) {
+                            // Обработка исключения, связанного с методом canMoveToPosition
+                            System.err.printf("Ошибка при проверке угрозы королю: %s на позиции (%d, %d)%n", piece, i, j);
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            // Обработка возможного исключения, если piece окажется null
+            System.err.println("Ошибка: NullPointerException при проверке угрозы королю.");
+            e.printStackTrace();
+        } catch (Exception e) {
+            // Обработка других возможных исключений
+            System.err.println("Произошла непредвиденная ошибка при проверке угрозы королю.");
+            e.printStackTrace();
         }
 
-        int kingX = kingPos[0]; // x-координата короля
-        int kingY = kingPos[1]; // y-координата короля
+        return false;
+    }
 
-        String opponentColor = color.equals("White") ? "Black" : "White";
 
-        // Проверяем все клетки на доске
+    public boolean isCheckmate(String playerColor) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 ChessPiece piece = board[i][j];
-
-                // Если на клетке есть фигура противника
-                if (piece != null && piece.getColor().equals(opponentColor)) {
-                    try {
-                        // Проверяем, может ли она атаковать короля
-                        if (piece.canMoveToPosition(this, i, j, kingX, kingY)) {
-                            return true; // Шах
+                if (piece != null && piece.getColor().equals(playerColor)) {
+                    for (int x = 0; x < 8; x++) {
+                        for (int y = 0; y < 8; y++) {
+                            if (piece.canMoveToPosition(this, i, j, x, y)) {
+                                ChessPiece temp = board[x][y];
+                                board[x][y] = piece;
+                                board[i][j] = null;
+                                boolean isInCheck = isKingInCheck(playerColor);
+                                board[i][j] = piece;
+                                board[x][y] = temp;
+                                if (!isInCheck) return false;
+                            }
                         }
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("Неверные координаты: (" + i + ", " + j + ")");
-                        throw new RuntimeException(e); // Перехватываем исключение и бросаем новое
                     }
                 }
             }
         }
-        return false; // Шаха нет
+        return true;
     }
 
     public boolean moveToPosition(int startLine, int startColumn, int endLine, int endColumn) {
-        if (checkPos(startLine) && checkPos(startColumn)) {
+        if (checkPos(startLine) && checkPos(startColumn) && checkPos(endLine) && checkPos(endColumn)) {
 
             if (!nowPlayer.equals(board[startLine][startColumn].getColor())) return false;
 
             if (board[startLine][startColumn] instanceof King) {
-                if (new King("White").isUnderAttack(this, endLine, endColumn) || new King("Black").isUnderAttack(this, endLine, endColumn)) {
-                    System.out.println("Нельзя ходить под шах!");
-                    return false;
-                }
-
                 /// Обновляем переменную check у короля
                 board[startLine][startColumn].check = false;
             }
@@ -91,25 +115,22 @@ public class ChessBoard {
                 board[startLine][startColumn].check = false;}
 
             if (board[startLine][startColumn].canMoveToPosition(this, startLine, startColumn, endLine, endColumn)) {
-                board[endLine][endColumn] = board[startLine][startColumn];
-                promoteToQueen(endLine, endColumn);
+                ChessPiece temp = board[endLine][endColumn]; // Сохраняем фигуру, которая была на целевой клетке
+                board[endLine][endColumn] = board[startLine][startColumn]; // Делаем ход
                 board[startLine][startColumn] = null;
-                this.nowPlayer = this.nowPlayerColor().equals("White") ? "Black" : "White";
 
-            // Проверяем, находится ли король под шахом после хода
-            /*String opponentColor = nowPlayer.equals("White") ? "Black" : "White"; // Определяем цвет противника
-            int[] kingPos = findKing(nowPlayer); // Находим короля текущего игрока
-            if (kingPos != null) {
-                int kingX = kingPos[0], kingY = kingPos[1];
+                // Проверяем, не попал ли наш король под шах после хода
                 if (isKingInCheck(nowPlayer)) {
-                    // Король под шахом, устанавливаем флаг
-                    ((King) board[kingX][kingY]).setCheck(true);
-                    System.out.println("Шах!");
-                } else {
-                    // Король вне опасности, сбрасываем флаг
-                    ((King) board[kingX][kingY]).setCheck(false);
-                }*/
+                    // Откатываем ход назад, если король оказался под шахом
+                    board[startLine][startColumn] = board[endLine][endColumn];
+                    board[endLine][endColumn] = temp;
+                    System.out.println("Невозможно сделать такой ход, потому что ваш король попадёт под шах.\nИли уже находится под шахом!");
+                    return false;
+                }
 
+                promoteToQueen(endLine, endColumn);
+
+                this.nowPlayer = this.nowPlayerColor().equals("White") ? "Black" : "White";
 
                 return true;
             } else return false;
@@ -139,7 +160,7 @@ public class ChessBoard {
     }
 
     public boolean checkPos(int pos) {
-        return pos >= 0 && pos <= 7;
+        return pos >= 0 && pos < 8;
     }
 
     public boolean castling0(){
